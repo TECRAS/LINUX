@@ -1,0 +1,28 @@
+# Configurações de compartilhamneto de arquivo no linux (para ambiente linux)
+# Network File System (NFS)
+Atualizando as listas de repositórios 
+apt-get update
+# Instalando NFS
+apt-get install nfs-kernel-server nfs-common -y
+# Diretorio Compartilhado
+# Criando diretório
+mkdir /pastacompartilhada
+# Configurando o arquivo
+vim /etc/eports
+# Controle total de escrita e gravação
+/pastacompartilhada   192.168.10.0/255.255.255.0(rw,no_subtree_check,no_root_squash)
+# Apenas Leitura para está rede
+/pastacompartilhada   192.168.20.0/255.255.255.0(ro,no_subtree_check,)
+#Validando as configurações
+exportfs -a
+# Reiniciando o serviço
+/etc/init.d/nfs-kernel-server start
+#
+# Criando diretório no cliente1
+mkdir /root/compartilhamento/
+# Montando o Compartilhamento no cliente 
+mount -t nfs 192.168.10.1:/pastacompartilhada   /root/compartilhamento
+
+# Verificar Informações de serviços no Servido
+rpcinfo -p
+
