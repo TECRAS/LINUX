@@ -1,3 +1,4 @@
+# Configurações Basicas 
 # Configurações Servidor FTP
 # Atualizando a lista de repositórios do Linux
 apt-get update 
@@ -16,4 +17,63 @@ porta         21
 
 # Criando usuários 
 adduser fulano
+
+#Servidor FTP Seguro (SSL)
+
+# Preparando o ambiente
+#Atualizando a lista de repositórios do servidor 
+# Instalando openssl ca-certificates
+apt-get install openssl ca-certificates
+# Criar diretório para gerar as chaves e certifficados 
+
+mkdir /root/certs 
+cd /root/certs
+# Gerando a chave com senha
+openssl genrsa -des3 -out server.key 2048
+# Digite a senha
+# Gerando arquivo em cima do arterior 
+openssl rsa -in server.key -out server.key.insecure
+# Alterando as permissões do arquivo server.key.insecure
+chmod 600 server.key.insecure
+
+# Gerando arquivo de requisição 
+openssl req -new -key server.key -out server.csr
+
+# Solicitando dados 
+Country name: BR
+State or Province name: São Paulo
+Locality Name: São Paulo
+Organization Name:
+Organiozational unit Name:
+Cammon Name (Server FQDN or your name):
+Email address: 
+# Criando certificado auto assinado
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt 
+# Solicita a senha do server.key
+# Copiando os arquivos para seus devidos lugares.
+cp server.key server.key.insecure /etc/ssl/private/
+cp server.crt /etc/ssl/certs/
+
+# Configuração dos arquivos no FTP
+
+vim /etc/proftpd/tls.conf
+# Descomentando as linha
+TLSEngine
+TLSLog
+TLSProtocol
+TLSRSACertificateFile       /etc/certs/server.crt
+TLSRSACertificateKeyFile    /etc/ssl/private/server.key.insecure
+TLSOptions                  NoSessionReuseRequired
+TLSRequired                 on
+# Sair salvando wq!
+
+# Configurando o arquivo /etc/proftpd/proftpd.conf
+vim /etc/proftpd/proftpd.conf
+# Linha 138 descomentar # Include /etc/proftpd/tls.conf
+Include /etc/proftpd/tls.conf
+# reiniciando o serviço
+/etc/init.d/proftpd restart
+
+
+
 
