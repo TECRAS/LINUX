@@ -1,0 +1,19 @@
+# Configurações Servidor FTP
+# Atualizando a lista de repositórios do Linux
+apt-get update 
+# Instalando o serviço de FTP proftpd
+apt-get install proftpd-basic 
+# Arquivo de configuração do serviço
+vim /etc/proftpd/proftpd.conf
+
+useIPV6 on/off
+Servername    "Servidor"
+DefaultRoot    ~
+porta         21
+# Sair salvando wq!
+# Reiniciando o serviço
+/etc/init.d/proftpd restart
+
+# Criando usuários 
+adduser fulano
+
