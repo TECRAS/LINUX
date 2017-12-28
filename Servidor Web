@@ -1,0 +1,68 @@
+#Servidor Web - Apache, PHP, MySQL e PHPMyAdmin
+
+#Atualizando op repositório do servidor
+# Instalando o Apache2
+apt-get install apache2 -y
+
+# Editando o arquivo ssl
+vim /etc/apache2/sites-available/default-ssl
+
+# Linha 35
+SSLEngine   on
+
+SSLCertificateFile       /etc/certs/server.crt
+SSLCertificateKeyFile    /etc/ssl/private/server.key.insecure
+
+# Ativando modulo ssl apache2
+a2enmod ssl
+a2ensite default-ssl
+# Reiniciando serviço apache2
+/etc/init.d/apache2 restart
+
+# Instalando o php5 e as bibliotecas 
+apt-get install php5 libapache2-mod-php5 -y
+# Testando o php5 (Não é recomendadomanter este scriptno servidor, por questoes de segurança)
+vim /var/www/info.php
+
+<?php
+  phpinfo();
+  ?>
+  # Instalando mysql e phpmyadmin
+  apt-get install mysql-server php5-mysql phpmyadmin -y
+  
+  # Servidor Apache - Módulo userdir
+  # Ativando o módulo a2enmod userdir ( Faz link da home do usuário ao apache2)
+  # Habilitando o php5 para os usuários ( Por questoes de segurança não é recomendado)
+  vim /etc/apache2/mods-available/php5.conf
+  #linha 25 (php_admin_value engine off)
+  #php_admin_value engine off
+  # Reiniciar apache2
+  /etc/init.d/apache2 restart
+  # Criar diretório paublic_html na home do usuário 
+  cd /home/usuario/
+  mkdir public_html
+  cd public_html
+  # Criar pagina simples de teste
+  vim index.html
+  <HTML>
+      <BODY>
+            <h1>usuário Fulano!</h1>
+            
+      </BODY>
+  </HTML>
+  # Criando usuário alguem 
+  useradd alguem
+  cd /home/alguem
+ mkdir public_html
+ vim index.html
+ <html>
+      <head>
+            <title>Meu site Pessoal</tile>
+      </head>
+      <body> 
+          <h1>Meu Site pessoal</h1>
+          <h3>Sejam vindos!!!<h3>
+      </body>
+</html>
+
+ 
