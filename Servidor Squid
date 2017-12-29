@@ -1,0 +1,170 @@
+# Servidor Proxy/Cache - Squid Básico
+# Em uma máquina separada 
+# Três placas de rede 1NAT 2Rede Interna
+# Atualizando os repositorios 
+apt-get update
+# Configurando as redes
+vim /etc/network/interfaces
+
+# Configurando a placa eth0 modo dhcp
+allow-hotplug eth0
+iface eth0 inet dhcp
+
+# Configurando a placa eth1 modo statico
+allow-hotplug eth1
+iface eth1 inet static
+    address 192.168.10.254
+     netmask 255.255.255.0
+
+# Configurando a placa eth2 modo statico
+allow-hotplug eth2
+iface eth2 inet static
+    address 192.168.20.254
+    netmask 255.255.255.0
+# Startando as placas de rede
+ifup eth1
+ifup eth2
+# Verificando as configurações 
+ifconfig
+
+# Alterando o hostname da máquina para squid
+vim /etc/hostname
+# Alterções em 127.0.1.1 debian para squid
+vim /etc/hosts
+# Validando as configurações 
+. /etc/init.d/hostname.sh
+# instalando o squid
+apt-get install squid3 -y
+# verificando as arquivo de configuarção do squid
+# opção wc faz a contagem das linhas no arquivo
+cat /etc/squid3/squid.conf | wc -l
+vim /etc/squid3/squid.conf 
+# Incluir as redes para acesso
+# Pesquisando as linhas necessárias para modificação 
+/acl_localnet_src # linha 706
+# Incluido acl
+acl rede01 src 192.168.10.0/24
+acl rede02 src 192.168.20.0/24
+# Prmitindo o acesso para as redes
+/http_access allow localnet # Linha 843
+# Liberando acesso
+http_access allow rede01
+http_access allow rede02
+
+# Conigurando cache
+/cache_dir ufs # linha 2238
+cache_dir ufs /var/spool/squid3 2048 16 256
+# Pesquisando o tamanho do objeto
+/maximum_object_size # Descomenta
+# Visible hostname
+/visible_hostname # Descomenta
+visible_hostname servidorsquid
+# Reiniciar o squid3
+/etc/init.d/squid3 restart
+# FAzer aletrações no servidor DHCP
+vim /etc/dhcp/dhcpd.conf
+options routers 192.168.10.254
+options routers 192.168.20.254
+# Reiniciar o dhcp server
+/etc/init.d/isc-dhcpd restart
+
+# Squid Transparente + Bloqueios
+#Configurando squid de forma transparente
+vim /etc/squid3/squid.conf
+/http_port 3128 intercept
+http_port 3128 intercept
+# Recarregar o squid com reload
+/etc/init.d/squid3 reload
+# Ativar oencaminhamentode pacotes
+echo "1" > /proc/sys/net/ipv4/ip_forward
+# Criando as regras de firewall
+# Liberando o HTTPS
+iptables -t nat -A PREROUTING -s 192.168.20.0/24 -p tcp --dport 443 -J ACCEPT
+# Redirecionar o trafego na porta 80 para 3128
+iptables -t nat -A PREROUTING -s 192.168.20.0/24 -p tcp --dport 80 -j REDIRECT --to-port 3128
+iptables -t nat -A PREROUTING -s 192.168.20.0/24 -p udp --dport 80 -j REDIRECT --to-port 3128
+# Criando o mascaramento para a saída dos pacotes
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# Criando diretorio para armazenar arquivos com as regras utilizadas no squid
+mdkir /etc/squid3/regras
+# Criar arquivos commpalavras proibida
+vim /etc/squid3/regaras/sistes_bloqueados
+sexo
+game
+
+# Aplicando as regras no squid.conf
+vim /etc/squid3/squid.conf
+/http_access allow localnet
+# Acima do localnet
+acl bloquados url_regex -i "/etc/squid3/regras/sites_bloqueados"
+http_access allow rede02 !bloqueados
+# Regras de bloqueio pelo dominio 
+vim /etc/squid3/regras/dominios
+.globo.com
+.santander.com
+
+# Aplicando as regras pelo dominio 
+# Acima do localnet
+vim /etc/squid3/squid.conf
+
+acl dominios dstdomain -i "/etc/squid3/regras/dominios"
+http_access allow rede02 !bloqueados !dominios
+
+# Recarregar o squid /etc/init.d/squid3 reload
+/etc/init.d/squid3 reload
+
+
+# Squid Avançado + Firewall
+
+# Criando o scrip de firewall
+vim /etc/init.d/firewall.sh
+
+#!/bin/bash
+case "$1" in
+          start)
+# Limpando as Regras
+iptables -F
+iptables -X
+iptables -t nat -F
+ipatables -t nat -X
+
+                  echo "1" > /proc/sys/net/ipv4/ip_-forward
+                  iptables -A FORWARD -s 192.168.10.0/24 -p tcp --dport 443 -j ACCEPT
+                  iptables -A FORWARD -s 192.168.20.0/24 -p tcp --dport 443 -j ACCEPT
+
+# Redirecionamento de pacote na rede 192.168.10.0/24
+
+                  iptables -t nat -A PREROUTING -s 192.168.10.0/24 -p tcp --dport 80 -j REDIRECT --to-port 3128
+                  iptables -t nat -A PREROUTING -s 192.168.10.0/24 -p udp --dport 80 -j REDIRECT --to-port 3128
+
+# Redirecionamento de pacote na rede 192.168.20.0/24
+
+                  iptables -t nat -A PREROUTING -s 192.168.20.0/24 -p tcp --dport 80 -j REDIRECT --to-port 3128
+                  iptables -t nat -A PREROUTING -s 192.168.20.0/24 -p udp --dport 80 -j REDIRECT --to-port 3128
+
+# Regra de mascaramento de pacotes
+                  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+          ;;
+          stop)
+# Limpando as Regras
+          iptables -F
+          iptables -X
+          iptables -t nat -F
+          ipatables -t nat -X
+          echo "1" > /proc/sys/net/ipv4/ip_-forward
+          iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+          ;;
+          *)
+              echo "Paramentro inválido!"
+    esac
+          ;;
+          
+# Alerando as permissões do arquivo chmod +x /etc/init.d/firewall.sh
+chmod +x /etc/init.d/firewall.sh
+# Iniciando o Firewall
+/etc/init.d/firewall.sh
+
+
+
+
