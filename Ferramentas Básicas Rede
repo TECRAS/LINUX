@@ -1,0 +1,56 @@
+# Ferramentas Básicas Rede
+# Modo texto
+# Atualizando os repositórios
+apt-get update
+# Instalando ferramenas servidor proxy 
+apt-get install iftop
+# Monitorando a placa de rede
+iftop -i eth2 
+# Tail - monitorar o trafego de rede de bloqueio 
+tail -f /var/log/squid3/access.log | grep 192.168.20.10
+
+# Instando o iptraf
+apt-get install iptraf
+# Testando
+iptraf
+# Instalando o nmap scanner de rede
+apt-get install nmap
+nmap 192.168.20.10
+namp -sVP 192.168.20.* 
+nmap 192.168.20.* 
+# Instalando arping
+apt-get install arping
+# Testando 
+arping 192.168.20.1
+
+# apt-get install apche2 php5 monin
+apt-get install apache2 php5 -y
+apt-get install monin munin-node muunin-plugins-extra
+# Configurar
+vim /etc/munin/munin-node.conf
+allow ^127\.0\.0\.1\$
+# Reiniciando munin-node
+/etc/init.d/munin-node restart
+# Conigurar munin.conf
+vim /etc/munin/munin.conf
+# Linha 97
+# a simple host tree
+[squid.cursolinuxserver.int]
+  address 127.0.0.1
+  use_node_name yes
+# vim /etc/apache2/conf.d/munin
+# Linha 18 
+allow from localhost 127.0.0.0/8
+allow from all
+# Reiniciando o apache2
+/etc/init.d/apache2 restart
+# Abrir o munin
+192.168.20.254/munin
+
+  
+
+
+
+
+
+
