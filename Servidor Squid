@@ -165,6 +165,9 @@ chmod +x /etc/init.d/firewall.sh
 # Iniciando o Firewall
 /etc/init.d/firewall.sh
 
+# Colocar o scrip dofirewall para iniciar juunto ao sistema
+update-rc.d firewall.sh defaults
+
 # Mais configurações para limitar o tamanho do download no /etc/sdquid3/squid.conf
 vim /etc/squid3/squid.conf
 /replay_body_max_size
