@@ -1,0 +1,69 @@
+# Ferramentas - sarg e mrtg
+
+# Instalando o sarg e mrtg
+apt-get install sarg
+# Configurando sarg
+vim /etc/sarg/sarg.conf
+access_log /var/log/squid3/access.log
+# Linha 25
+title   "Relatório do Squid"
+# Linha 121
+output_dir    /var/www/sarg
+# Sair salvando wq!
+vim /etc/sarg/sarg-reports.conf
+# Linha 3 
+HTMLOUT=/var/www/sarg
+PAGETITLE="Relatórios Sarg  do Squid $(hostname)"
+# Sair Salvando
+# Craindo o diretorio para o sarg
+mkdir /var/www/sarg 
+# Rodando o Relatório Manualmente 
+sarg-reports today 
+# Executar automaticamente 
+crontab -e 
+# M H dom mon dow command
+*/5 * * * *  /usr/sbin/sarg-reports today > /deve/null 2>&1
+# Reiniciar o cron
+/etc/init.d/cron restart
+
+# MRTG graficos das interfaces de rede
+apt-get install mrtg snmpd
+vim /etc/snmp/snmpd.conf 
+# Apagar todo o conteúdo 
+# Configurando
+recommunity public
+syslocation "Squid"
+syscontact root@squid
+com2sec public localhost public
+group public v1 public
+group public v2c public
+group public usm public
+view all included .1
+access public "" any noauth exact all none none 
+# Sair salvando 
+# Configurações defaults
+vim /etc/defaults/snmpd
+# Linha 11
+# Inserir no final da linha -c /etc/snmp/snmpd.conf
+SNMPDPORTS= '                                 -c /etc/snmp/snmpd.conf'
+# Linha 16 TRAPDRUN=no
+TRAPDRUN=yes
+# Reiniciar o snmp
+/etc/init.d/snmpd restart
+# Criar o diretório
+mkdir /var/www/mrtg
+#Alterar as permissões 
+chmod o+w /var/www/mrtg/
+# Deretório de trabalho mrtg
+cfgmaker --global 'WorkDir:/var/www/mrtg' --ifref=name --ifdesc=eth --global 'Options [_] :bits' --output /etc/mrtg.cfg public@localhost
+# Criar o index.html com indemaker
+indexmaker /etc/mrtg.cfg > /var/www/mrtg/index.html
+# Rodar mrtg 
+env LANG=C /usr/bin/mrtg /etc/mrtg .cfg
+# Atumatizar crontab 
+*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg .cfg 
+# Reiniciar o crontab 
+/etc/init.d/crontab restart
+
+
+
