@@ -1,0 +1,19 @@
+# Realizando upgrade de versão linux debian 8 Jessie para a versão 9
+# Verificando a versão atual
+hostnamectl
+#Atualizando os repositorios atuais
+apt-get update 
+apt-get upgrade -y
+apt-get dist-upgrade
+# Alterando o repositorio atual
+# Antes realizar um bakup do arquivo /etc/apt/sources.list
+cp /etc/apt/sources.list  /etc/apt/sources.list.orig
+# Alterar o jessie para stretch
+
+#Atualizando os repositorios novos
+#
+apt-get update 
+apt-get upgrade -y
+apt-get dist-upgrade
+
+
