@@ -1,0 +1,22 @@
+BACKUP DE ARQUIVOS E DIRETORIOS COM rsync
+
+
+SINTAX:
+
+// rsync [opções] origem destino
+
+
+Algumas opções:
+
+-a modo de arquivamento (preserva timestamps, links simbólicos, permissões,
+e grupos)
+-r modo recursivo
+-z habilitar compressão
+-v modo verboso
+--max-size= 'nk | M | G' Tamanho máximo (n) de cada arquivo a transferir 
+--exclude - 'padrão' Permite excluir do backup determinadoa padrões
+de arquivos, como arquivos de texto ou imagens. 
+--delete - Exclui do backup existente arquivos apagados na pasta de origem
+
+# Parametros utilizados  | origem     Destino 
+rsync -arztvp --delete sdb1-grupos-1  /misc/
