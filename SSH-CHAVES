@@ -1,0 +1,24 @@
+https://andykdocs.de/development/Linux/2013-01-17+Rsync+over+SSH+with+Key+Authentication
+
+#SSH - CONEXÃO POR CHAVE PÚBLICA E CRIPTOGRAFIA
+#Criando a chave pública e priva
+
+Os procedimentos inicias é preciso realizar no criente, pois é ele que necessita da conexão.
+Após copa a chave pública para o diretorio home do usuário que 
+realizará a conexão no servidor.
+
+scp aquivo aluno@192.168.0.121:
+O ARQUIVO SERÁ COPIADO PARA O HOME DO USUÁRIO NO SERVIDOR
+
+ssh-keygen -t dsa 
+
+/root/.ssh/id_dsa
+
+scp id_dsa.pub aluno@192.168.0.103:
+
+servidor
+
+Instalação da chave
+/home/aluno/.ssh
+
+cat id_dsa.pub >> ~/.ssh/authorized_keys 
