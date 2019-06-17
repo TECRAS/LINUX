@@ -1,1 +1,6 @@
+vim /etc/apache2/sites-avaible
 
+<VirtualHost *:80>
+  DocumentRoot /var/www/html/sistema
+  ServerName  www.meusite.com.br
+  </VirtualHost>
